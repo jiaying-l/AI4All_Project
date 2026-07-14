@@ -11,13 +11,15 @@ Original file is located at
 ##Libraries
 """
 
-pip install --upgrade kagglehub
+# if kagglehub not found
+!pip install --upgrade kagglehub
 
 import kagglehub
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 news_path = kagglehub.dataset_download("miguelaenlle/massive-stock-news-analysis-db-for-nlpbacktests")
 
@@ -39,29 +41,35 @@ dataset_root = os.path.join(stock_path, 'historical_stock_prices.csv')
 stock = pd.read_csv(dataset_root)
 stock
 
-"""###Data Cleaning - news headlines"""
+"""###Data Cleaning"""
 
-# remove "unnameed: 0" column, duplicates as the index
+# remove "unnameed: 0" column from news_df, duplicates as the index
 
-# reuncate "date" info to contain only YYYY-MM-DD, so take out the time
+# reuncate "date" info to contain only YYYY-MM-DD from news_df, so take out the time
 
-# remove any rows with null values
+# remove any rows with null values from news_df
 
-# remove any rows where the date exceeds date range of stock_df
+# remove any rows from news_df where the date exceeds date range of stock_df
 
-# remove news_df rows where value in "stock" does not match "ticker" value in stock_df
+# remove rows from news_df where value in "stock" does not match "ticker" value in stock_df
 
-"""###Data Cleaning - historic stock"""
+# remove any rows with null values from stock_df
 
-# remove any rows with null values
+# remove any rows from stock_df where the date exceeds the date range of news_df
 
-# remove any rows where the date exceeds the date range of news_df
-
-# remove stock_df rows where value in "ticker" value does not match "stock" value in news_df
+# remove rows from stock_df where value in "ticker" value does not match "stock" value in news_df
 
 # by matching the dates of news_df to dates of stock_df,
 # only keep rows stock_df with dates 3 days from the news headline publish date and also the row for the date after
 ## ex. news_date(2025-04-23); keep rows from stock_df with dates {2025-04-21,2025-04-22, 2025-04-23, 2025-04-24}
+
+# by matching the date of the news headline and the stock ticker,
+# add the prices of the stock from the past 3 days to a new column in news_df
+# also add the next day's stock price to the news_df as a new column
+
+# add column in news_df for whether stock prices went up or down
+## ex. price from 1_day_ago is higher than price of next_day -> price_went_up column value = 1
+## ex. price from 1_day_ago is lower than price of next_day -> price_went_up column value = 0
 
 """##Visualizations"""
 
@@ -73,4 +81,16 @@ stock
 
 # plot counts of top bigrams (n-grams)
 
+# plot price_went_up column
+
 # other plots you deem fit
+
+"""##Data Spliting"""
+
+X = news.drop('price_went_up', axis=1)
+y = news['price_went_up']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=6, stratify=True)
+
+"""##Pre-processing"""
+
