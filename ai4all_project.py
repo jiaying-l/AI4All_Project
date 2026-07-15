@@ -21,6 +21,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+import nltk
+
 news_path = kagglehub.dataset_download("miguelaenlle/massive-stock-news-analysis-db-for-nlpbacktests")
 
 print("Path to dataset files:", news_path)
@@ -41,7 +45,7 @@ dataset_root = os.path.join(stock_path, 'historical_stock_prices.csv')
 stock = pd.read_csv(dataset_root)
 stock
 
-"""###Data Cleaning"""
+"""###Data Cleaning & Pre-processing"""
 
 # remove "unnameed: 0" column from news_df, duplicates as the index
 
@@ -59,13 +63,13 @@ stock
 
 # remove rows from stock_df where value in "ticker" value does not match "stock" value in news_df
 
-# by matching the dates of news_df to dates of stock_df,
-# only keep rows stock_df with dates 3 days from the news headline publish date and also the row for the date after
-## ex. news_date(2025-04-23); keep rows from stock_df with dates {2025-04-21,2025-04-22, 2025-04-23, 2025-04-24}
+# by matching the date of the news headline and the stock ticker,
+# add the prices of the stock from the past 3 days to new columns in news_df
+## ex. news_date(2025-04-23); add values from stock_df with dates {2025-04-21,2025-04-22, 2025-04-23} to 3 new columns
 
 # by matching the date of the news headline and the stock ticker,
-# add the prices of the stock from the past 3 days to a new column in news_df
-# also add the next day's stock price to the news_df as a new column
+# add the next day's stock price to the news_df as a new column
+## ex. news_date(2025-04-23); add values from stock_df with dates {2025-04-24} to a new column 'next_day'
 
 # add column in news_df for whether stock prices went up or down
 ## ex. price from 1_day_ago is higher than price of next_day -> price_went_up column value = 1
@@ -85,6 +89,65 @@ stock
 
 # other plots you deem fit
 
+"""##FINBert 2.0"""
+
+finbert = pipeline(
+    "text-classification",
+    model = "ProsusAI/finbert"
+)
+
+news = news.head(3)
+news
+
+headlines = news['title'].tolist()
+
+results = finbert(
+    headlines,
+    batch_size = 32,
+    truncation = True
+)
+
+news['sentitment'] = [r['label'] for r in results]
+news['confidence'] = [r['score'] for r in results]
+
+news
+
+news["sentitment"] = news["title"].apply(
+    lambda x: finbert(str(x))[0]['label']
+)
+
+news
+
+"""##FINBert (NLP)"""
+
+# Load pre-trained FINBERT model and tokenizer
+tokenizer = AutoTokenizer.from_pretrained('ProsusAI/finbert')
+model = AutoModelForSequenceClassification.from_pretrained('ProsusAI/finbert')
+
+# Set model to evaluation mode
+model.eval()
+
+def get_sentiment(text):
+    if pd.isna(text):
+        return None
+
+    inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    # Get the predicted class (0: positive, 1: negative, 2: neutral)
+    logits = outputs.logits
+    probabilities = torch.softmax(logits, dim=1)
+
+    # Map to sentiment labels
+    sentiment_labels = ['positive', 'negative', 'neutral']
+    predicted_class_idx = torch.argmax(probabilities, dim=1).item()
+
+    return sentiment_labels[predicted_class_idx]
+
+news['sentiment'] = news['title'].apply(get_sentiment)
+display(news.head())
+
 """##Data Spliting"""
 
 X = news.drop('price_went_up', axis=1)
@@ -92,5 +155,5 @@ y = news['price_went_up']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=6, stratify=True)
 
-"""##Pre-processing"""
+"""##Random Forest"""
 
