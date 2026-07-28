@@ -1,0 +1,7 @@
+{
+  "random_forest_accuracy": 0.5296,
+  "logistic_regression_accuracy": 0.4951,
+  "train_rows": 40000,
+  "test_rows": 10000,
+  "feature_count": 9
+}
