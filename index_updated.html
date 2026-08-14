@@ -214,6 +214,32 @@
     .method-card p { margin:0; color:var(--muted); }
     .template-note { margin-top:22px; padding:18px 20px; border-left:4px solid var(--brand); background:var(--mint); border-radius:0 16px 16px 0; color:#35564f; }
     @media (max-width: 760px) { .method-grid { grid-template-columns:1fr; } }
+
+    .viz-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+    .viz-card { background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:0 12px 32px rgba(10,82,63,.06); }
+    .viz-card.wide { grid-column:1/-1; }
+    .viz-card img { display:block; width:100%; height:auto; background:#fff; }
+    .viz-copy { padding:20px 22px 22px; }
+    .viz-copy h3 { margin:0 0 7px; font-size:20px; }
+    .viz-copy p { margin:0; color:var(--muted); font-size:14px; }
+    .insight { margin-top:18px; padding:18px 20px; border-radius:18px; background:var(--mint); border:1px solid var(--line); color:#35564f; }
+    .limitation-grid, .ethics-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .info-card { padding:26px; background:linear-gradient(160deg,#fff,var(--mint)); border:1px solid var(--line); border-radius:22px; }
+    .info-card .icon { width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:var(--deep); color:#fff; font-weight:900; margin-bottom:14px; }
+    .info-card h3 { margin:0 0 8px; font-size:20px; }
+    .info-card p { margin:0; color:var(--muted); font-size:14px; }
+    .future-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .future-card { padding:24px; background:#fff; border:1px solid var(--line); border-radius:20px; border-top:4px solid var(--brand); box-shadow:0 8px 24px rgba(10,82,63,.05); }
+    .future-card b { display:block; margin-bottom:7px; color:var(--deep); }
+    .future-card p { margin:0; color:var(--muted); font-size:14px; }
+    @media (max-width: 940px) {
+      .viz-grid, .limitation-grid, .ethics-grid { grid-template-columns:1fr 1fr; }
+      .future-grid { grid-template-columns:1fr 1fr; }
+    }
+    @media (max-width: 680px) {
+      .viz-grid, .limitation-grid, .ethics-grid, .future-grid { grid-template-columns:1fr; }
+      .viz-card.wide { grid-column:auto; }
+    }
   </style>
 </head>
 <body>
@@ -227,7 +253,10 @@
           <li><a href="#results">Key Results</a></li>
           <li><a href="#methodologies">Methodologies</a></li>
           <li><a href="#data">Data Sources</a></li>
-          <li><a href="#technologies">Technologies</a></li>
+          <li><a href="#visualizations">Visualizations</a></li>
+          <li><a href="#limitations">Limitations</a></li>
+          <li><a href="#future-work">Future Work</a></li>
+          <li><a href="#ethics">Ethics</a></li>
           <li><a href="#authors">Authors</a></li>
         </ul>
       </nav>
@@ -350,6 +379,60 @@
       </div>
     </section>
 
+
+    <section id="visualizations">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="kicker">Project Evidence</div><h2>Key Visualizations</h2></div>
+          <p>These plots summarize the target balance, changes in news volume over time, and how each model handled next-day price decreases.</p>
+        </div>
+
+        <div class="viz-grid">
+          <figure class="viz-card">
+            <img src="assets/class_distribution.png" alt="Pie chart showing 51.6 percent of observations were price up or stable and 48.4 percent were price decreases." loading="lazy">
+            <figcaption class="viz-copy">
+              <h3>Nearly balanced target classes</h3>
+              <p>51.6% of matched headlines were followed by an up-or-stable next day, while 48.4% were followed by a decrease. This reduces the risk that accuracy is driven mainly by a dominant class.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="viz-card">
+            <img src="assets/price_decreases_by_year.png" alt="Line chart showing the percentage of price decreases by year from 2009 through 2018." loading="lazy">
+            <figcaption class="viz-copy">
+              <h3>Price-decrease rates vary across years</h3>
+              <p>The yearly share of decreases changes over time, highlighting why temporal market conditions matter when evaluating a model trained on historical data.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="viz-card wide">
+            <img src="assets/headlines_over_time.png" alt="Line chart of financial news headline counts over time from 2009 through 2018." loading="lazy">
+            <figcaption class="viz-copy">
+              <h3>News coverage increases over the dataset period</h3>
+              <p>Later years contain substantially more headlines than the beginning of the sample. That uneven coverage can introduce time-period and media-visibility biases into the training data.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="viz-card">
+            <img src="assets/random_forest_confusion_matrix.png" alt="Random Forest confusion matrix showing stronger performance on the did-not-decrease class than on decreases." loading="lazy">
+            <figcaption class="viz-copy">
+              <h3>Random Forest: stronger overall accuracy</h3>
+              <p>The Random Forest correctly classified many more non-decrease cases than decrease cases. Its decrease recall was 27%, illustrating the trade-off behind its 54.42% overall accuracy.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="viz-card">
+            <img src="assets/logistic_confusion_matrix.png" alt="Logistic Regression confusion matrix showing more predicted decreases and higher recall for actual decreases." loading="lazy">
+            <figcaption class="viz-copy">
+              <h3>Logistic Regression: stronger decrease detection</h3>
+              <p>Logistic Regression caught substantially more actual decreases, reaching 61% recall, but with lower overall accuracy of 50.75%.</p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="insight"><strong>Why both models matter:</strong> Random Forest is the better choice when overall accuracy is prioritized, while Logistic Regression may be more useful when missing a true price decrease is more costly.</div>
+      </div>
+    </section>
+
     <section id="technologies">
       <div class="wrap">
         <div class="section-head">
@@ -358,6 +441,59 @@
         </div>
         <div class="tech-grid">
           <span class="tech">Python</span><span class="tech">pandas</span><span class="tech">NumPy</span><span class="tech">scikit-learn</span><span class="tech">PyTorch</span><span class="tech">Hugging Face Transformers</span><span class="tech">FinBERT</span><span class="tech">Matplotlib</span><span class="tech">Seaborn</span><span class="tech">KaggleHub</span><span class="tech">NLTK</span><span class="tech">Streamlit</span>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="limitations">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="kicker">Responsible Interpretation</div><h2>Limitations</h2></div>
+          <p>The model provides a useful proof of concept, but several factors limit how confidently its results can be generalized or used in real-world decisions.</p>
+        </div>
+        <div class="limitation-grid">
+          <article class="info-card"><div class="icon">02</div><h3>Media visibility bias</h3><p>Large or high-profile companies receive more news coverage than smaller firms. The model can therefore learn patterns that do not generalize evenly across companies or industries.</p></article>
+          <article class="info-card"><div class="icon">03</div><h3>Changing market behavior</h3><p>The matched dataset covers 2009–2018. Relationships between news, competition, and investor reactions may shift over time, so older patterns may not represent current markets.</p></article>
+          <article class="info-card"><div class="icon">04</div><h3>Headline-only context</h3><p>FinBERT was applied to headlines rather than complete articles, earnings calls, or filings. Headlines can omit context, nuance, and details that may affect sentiment interpretation.</p></article>
+          <article class="info-card"><div class="icon">05</div><h3>Market-share proxy</h3><p>The supervised target is next-day stock-price movement, not market share itself. Stock reactions are influenced by many factors, so a price decline should not be interpreted as direct evidence of competitive market-share loss.</p></article>
+          <article class="info-card"><div class="icon">06</div><h3>Limited predictive strength</h3><p>Accuracy was only modestly above baseline. The system is not reliable enough for autonomous trading or high-stakes financial decisions without substantially more validation.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="future-work">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="kicker">Next Steps</div><h2>Future Work</h2></div>
+          <p>Future versions can strengthen the early-warning signal by improving the data, expanding the text sources, and evaluating models under more realistic conditions.</p>
+        </div>
+        <div class="future-grid">
+          <article class="future-card"><b>Use newer market data</b><p>Retrain and test on more recent periods to measure how well the approach survives market regime changes.</p></article>
+          <article class="future-card"><b>Add richer financial indicators</b><p>Incorporate technical indicators, fundamentals, sector context, volatility, trading volume, and other market signals.</p></article>
+          <article class="future-card"><b>Analyze deeper text sources</b><p>Move beyond headlines to full articles, earnings calls, SEC filings, and other documents that contain richer competitive context.</p></article>
+          <article class="future-card"><b>Test advanced models</b><p>Compare stronger NLP and multimodal approaches that can jointly reason over text and time-series features.</p></article>
+          <article class="future-card"><b>Focus by industry</b><p>Build industry-specific models so the system can learn competitive signals that differ across sectors.</p></article>
+          <article class="future-card"><b>Use chronological evaluation</b><p>Evaluate with forward-looking splits and rolling windows to reduce leakage and better simulate real deployment.</p></article>
+          <article class="future-card"><b>Improve calibration and alerting</b><p>Measure probability calibration and tune alert thresholds around the cost of false positives versus missed declines.</p></article>
+          <article class="future-card"><b>Expand the dashboard</b><p>Develop a real-time competitive-risk dashboard with explanations, uncertainty, and historical context rather than a single prediction.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="ethics">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="kicker">Responsible AI</div><h2>Ethical Considerations</h2></div>
+          <p>Financial prediction systems can influence real decisions, so useful deployment requires transparency about uncertainty, bias, and the limits of automated forecasts.</p>
+        </div>
+        <div class="ethics-grid">
+          <article class="info-card"><div class="icon">A</div><h3>Avoid overclaiming</h3><p>Predictions should be presented as uncertain risk signals, not as facts or investment advice. The project’s modest accuracy makes clear communication especially important.</p></article>
+          <article class="info-card"><div class="icon">B</div><h3>Guard against unequal coverage</h3><p>News-volume differences can systematically favor large companies and underrepresent smaller firms. Performance should be checked across company size, industry, and time period.</p></article>
+          <article class="info-card"><div class="icon">C</div><h3>Keep humans in the loop</h3><p>Investors or managers should review the underlying evidence and business context before acting. Automated alerts should support—not replace—human judgment.</p></article>
+          <article class="info-card"><div class="icon">D</div><h3>Explain model behavior</h3><p>Users should be able to see which recent price and sentiment features contributed to an alert, along with model confidence and known failure modes.</p></article>
+          <article class="info-card"><div class="icon">E</div><h3>Monitor model drift</h3><p>Because financial markets evolve, a deployed system should be monitored for changing accuracy and recalibrated or retired when its assumptions no longer hold.</p></article>
+          <article class="info-card"><div class="icon">F</div><h3>Prevent harmful use</h3><p>The prototype should not be positioned as a tool for guaranteed returns or autonomous trading. Responsible use means emphasizing research, monitoring, and decision support.</p></article>
         </div>
       </div>
     </section>
